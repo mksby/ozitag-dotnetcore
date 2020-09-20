@@ -24,14 +24,34 @@ namespace TodoApi.Controllers
         [HttpGet]
         public async Task<ActionResult<Response<List<Apartament>>>> GetApartament([FromQuery] PaginationFilter filter)
         {
-            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
+            var validFilter = new PaginationFilter(
+                filter.PageNumber,
+                filter.PageSize,
+                filter.Rooms,
+                filter.PriceMin,
+                filter.PriceMax
+            );
 
-            var apartaments = await _context.Apartament
-                .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
-                .Take(validFilter.PageSize)
-                .ToListAsync();
+            IQueryable<Apartament> query = _context.Apartament;
 
-            var totalRecords = await _context.Apartament.CountAsync();
+            if (filter.Rooms != null) {
+                query = query.Where(a => a.rooms == validFilter.Rooms);
+            }
+
+            if (filter.PriceMin != null) {
+                query = query.Where(a => a.price >= filter.PriceMin);
+            }
+
+            if (filter.PriceMax != null) {
+                query = query.Where(a => a.price <= filter.PriceMax);
+            }
+
+            var totalRecords = await query.CountAsync();
+
+            query = query.Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                .Take(validFilter.PageSize);
+
+            var apartaments = await query.ToListAsync();
 
             return PaginationHelper.CreatePagedReponse<Apartament>(apartaments, validFilter, totalRecords);
         }
