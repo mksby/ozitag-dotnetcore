@@ -22,9 +22,18 @@ namespace TodoApi.Controllers
 
         // GET: api/Apartaments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Apartament>>> GetApartament()
+        public async Task<ActionResult<Response<List<Apartament>>>> GetApartament([FromQuery] PaginationFilter filter)
         {
-            return await _context.Apartament.Take(10).ToListAsync();
+            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
+
+            var apartaments = await _context.Apartament
+                .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                .Take(validFilter.PageSize)
+                .ToListAsync();
+
+            var totalRecords = await _context.Apartament.CountAsync();
+
+            return PaginationHelper.CreatePagedReponse<Apartament>(apartaments, validFilter, totalRecords);
         }
 
         // GET: api/Apartaments/5
