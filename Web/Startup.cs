@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Web.Data;
+using BlazorFluentUI;
 
 namespace Web
 {
@@ -28,6 +29,8 @@ namespace Web
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+
+            services.AddBlazorFluentUI();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
